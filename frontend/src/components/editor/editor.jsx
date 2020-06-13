@@ -11,54 +11,64 @@ export default function Editor() {
     html: "",
     css: "",
     javascript: "",
-    cssCDN: "",
-    jsCDN: "",
-  };
+    cdn: "",
+  }; // for tracking changes in each field
   const [webCode, setWebCode] = useState({
     html: "",
     css: "",
     javascript: "",
-    cssCDN: "",
-    jsCDN: "",
   });
   const defaultStyles =
-    "<style>body{background-color:#333;}p{text-align: center;color:white;}</style><p>pls type your code <3</p>";
+    "<style>body{background-color:#333;}p{text-align: center;color:white;}</style><p>pls type your code <3</p>"; //default styles iframe
   const ENDPOINT = "http://localhost:5000/";
-  useEffect(() => {
-    socket = io(ENDPOINT);
-    console.log(socket);
-  }, [ENDPOINT]);
-
-  useEffect(() => {
-    socket.on("code-send", (code) => {
-      updateFrame(code);
-    });
-  }, [value]);
+  // useEffect(() => {
+  //   socket = io(ENDPOINT);
+  //   console.log(socket);
+  // }, [ENDPOINT]);
+  // //activate when change in monaco
+  // useEffect(() => {
+  //   socket.on("code-send", (code) => {
+  //     updateFrame(code);
+  //   });
+  //}, [value]);
+  // for updating code in Iframe
   function updateFrame(newCode) {
-    const code = newCode;
+    // const code = newCode;
     var css = "<style>" + newCode.css + "</style>";
     var js = "<script>" + newCode.javascript + "</script>";
-    var net = newCode.html + css + js;
+    var net = newCode.html + css + js + newCode.cdn;
     setValue(net);
     setWebCode((prevValue) => {
       return {
         ...prevValue,
-        html: code.html,
-        css: code.css,
-        javascript: code.javascript,
+        html: newCode.html,
+        css: newCode.css,
+        javascript: newCode.javascript,
       };
     });
   }
-
+  // fires when a cdn is selected
+  function CDN(cdn) {
+    if (cdn != null) {
+      var cdns = "<!--" + cdn.title + "-->" + cdn.cdn;
+      codeSplit = {
+        ...codeSplit,
+        cdn: cdns,
+      };
+    }
+  }
+  // to handle change in  monaco Editor and for live editing
   function handleEditorChange(lang, newCode) {
     codeSplit = {
       ...codeSplit,
       [lang]: newCode,
     };
     updateFrame(codeSplit);
-    socket.emit("code-recieve", { ...codeSplit });
+    // socket.emit("code-recieve", { ...codeSplit });
   }
+  // to check if value is empty and return styles
   function emptyValueChecker() {
+    console.log(value);
     return value === "" ? defaultStyles : value;
   }
   return (
@@ -71,6 +81,7 @@ export default function Editor() {
             language={language}
             value={webCode[[language]]}
             onChange={handleEditorChange}
+            CDN={CDN}
           />
         );
       })}
