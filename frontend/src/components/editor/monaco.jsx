@@ -22,6 +22,7 @@ export default function MonacoEditor(props) {
 
   const handleClickOpen = () => {
     setOpen(true);
+    console.log(props);
   };
 
   const handleClose = () => {
@@ -43,6 +44,7 @@ export default function MonacoEditor(props) {
           handleClose={handleClose}
           open={open}
           CDN={props.CDN}
+          autoCDN={props.autoCDN}
         />
       </div>
       <ControlledEditor

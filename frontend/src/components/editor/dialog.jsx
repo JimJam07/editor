@@ -65,7 +65,7 @@ export default function ResponsiveDialog(props) {
         <Divider />
         <DialogContent className="dialog">
           <h2>import external cdns</h2>
-          <AutoComplete CDN={props.CDN} />
+          <AutoComplete CDN={props.CDN} autoCDN={props.autoCDN} />
         </DialogContent>
       </Dialog>
     </div>

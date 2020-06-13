@@ -4,7 +4,7 @@ import Autocomplete, {
   createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
 import Chip from "@material-ui/core/Chip";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 const filter = createFilterOptions();
@@ -22,11 +22,16 @@ const useStyles = makeStyles((theme) => ({
 
 export default function FreeSoloCreateOption(props) {
   const classes = useStyles();
+  var cdnPush = [];
   var [cdnArray, setCdn] = useState([]);
   const [value, setValue] = React.useState(null);
 
-  function handleDelete(event) {
-    console.log(event);
+  function handleDelete(el) {
+    setCdn((prevCdn) => {
+      return prevCdn.filter((word) => word !== el);
+    });
+    cdnPush.filter((words) => `${words.title}-${words.version}` !== el);
+    props.CDN(cdnPush);
   }
 
   return (
@@ -34,13 +39,16 @@ export default function FreeSoloCreateOption(props) {
       <Autocomplete
         value={value}
         onChange={(event, newValue) => {
+          console.log(props);
           if (newValue != null) {
-            props.CDN(newValue);
+            cdnPush.push(newValue);
+            props.CDN(cdnPush);
             setCdn((prevState) => [
               ...prevState,
               `${newValue.title}-${newValue.version}`,
             ]);
           }
+
           if (typeof newValue === "string") {
             setValue({
               title: newValue,
@@ -99,14 +107,17 @@ export default function FreeSoloCreateOption(props) {
         )}
       />
       <div className={classes.root}>
-        {cdnArray.map((element) => {
+        {cdnArray.map((element, index) => {
           return (
             <Chip
+              key={index.toString()}
               size="small"
               label={element}
               color={Math.random() < 0.5 ? "primary" : "secondary"}
               variant="outlined"
-              onDelete={handleDelete}
+              onDelete={() => {
+                handleDelete(element);
+              }}
             />
           );
         })}
@@ -128,8 +139,7 @@ const top100Films = [
   },
   {
     title: "jQuery",
-    cdn:
-      '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>',
+    cdn: `<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>`,
     version: "3.5.1",
   },
 ];

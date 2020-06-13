@@ -5,6 +5,7 @@ import "./styles.css";
 
 let socket;
 export default function Editor() {
+  var [autoCDN, setAuto] = useState([]);
   const languages = ["html", "css", "javascript"];
   const [value, setValue] = useState("");
   var codeSplit = {
@@ -36,7 +37,8 @@ export default function Editor() {
     // const code = newCode;
     var css = "<style>" + newCode.css + "</style>";
     var js = "<script>" + newCode.javascript + "</script>";
-    var net = newCode.html + css + js + newCode.cdn;
+    var net = newCode.cdn + newCode.html + css + js;
+    console.log(net);
     setValue(net);
     setWebCode((prevValue) => {
       return {
@@ -49,12 +51,18 @@ export default function Editor() {
   }
   // fires when a cdn is selected
   function CDN(cdn) {
+    setAuto([...cdn]);
+    let cdns = "";
     if (cdn != null) {
-      var cdns = "<!--" + cdn.title + "-->" + cdn.cdn;
+      cdn.forEach((el) => {
+        cdns += "<!--" + el.title + "-->" + el.cdn;
+      });
       codeSplit = {
         ...codeSplit,
         cdn: cdns,
       };
+      // console.log(codeSplit.cdn);
+      updateFrame(codeSplit);
     }
   }
   // to handle change in  monaco Editor and for live editing
@@ -68,7 +76,6 @@ export default function Editor() {
   }
   // to check if value is empty and return styles
   function emptyValueChecker() {
-    console.log(value);
     return value === "" ? defaultStyles : value;
   }
   return (
@@ -82,6 +89,7 @@ export default function Editor() {
             value={webCode[[language]]}
             onChange={handleEditorChange}
             CDN={CDN}
+            autoCDN={autoCDN}
           />
         );
       })}
