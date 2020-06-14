@@ -4,7 +4,7 @@ import Autocomplete, {
   createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
 import Chip from "@material-ui/core/Chip";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import cdnVersion from "./cdn";
 
@@ -22,10 +22,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function FreeSoloCreateOption(props) {
-  const code = props.code;
   const classes = useStyles();
   var cdnPush = props.autoCDN;
   var dummy = [];
+  console.log(props);
   props.autoCDN.map((newValue) => {
     dummy.push(`${newValue.title}-${newValue.version}`);
   }); // a variable which recievs the active values of cdn from editor
@@ -36,7 +36,9 @@ export default function FreeSoloCreateOption(props) {
     setCdn((prevCdn) => {
       return prevCdn.filter((word) => word !== el);
     });
-    cdnPush=cdnPush.filter((words) => `${words.title}-${words.version}` !== el);
+    cdnPush = cdnPush.filter(
+      (words) => `${words.title}-${words.version}` !== el
+    );
     props.CDN(cdnPush, props.code, "delete");
   }
 
