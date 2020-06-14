@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
+// import io from "socket.io-client";
 import MonacoEditor from "./monaco";
 import "./styles.css";
 
-let socket;
+// let socket;
 export default function Editor() {
   var [autoCDN, setAuto] = useState([]);
   const languages = ["html", "css", "javascript"];
@@ -19,9 +19,10 @@ export default function Editor() {
     css: "",
     javascript: "",
   });
+  // const [cdnPush,setCdn] = useState([])
   const defaultStyles =
     "<style>body{background-color:#333;}p{text-align: center;color:white;}</style><p>pls type your code <3</p>"; //default styles iframe
-  const ENDPOINT = "http://localhost:5000/";
+  // const ENDPOINT = "http://localhost:5000/";
   // useEffect(() => {
   //   socket = io(ENDPOINT);
   //   console.log(socket);
@@ -38,7 +39,6 @@ export default function Editor() {
     var css = "<style>" + newCode.css + "</style>";
     var js = "<script>" + newCode.javascript + "</script>";
     var net = newCode.cdn + newCode.html + css + js;
-    console.log(net);
     setValue(net);
     setWebCode((prevValue) => {
       return {
@@ -50,15 +50,25 @@ export default function Editor() {
     });
   }
   // fires when a cdn is selected
-  function CDN(cdn) {
-    setAuto([...cdn]);
+  function CDN(cdn, code, requestType) {
+    if (requestType === "add") {
+      setAuto((prevValue) => {
+        return {
+          ...prevValue,
+          code,
+        };
+      });
+    }
+    if (requestType === "delete") {
+      setAuto(cdn);
+    }
     let cdns = "";
     if (cdn != null) {
       cdn.forEach((el) => {
         cdns += "<!--" + el.title + "-->" + el.cdn;
       });
       codeSplit = {
-        ...codeSplit,
+        ...code,
         cdn: cdns,
       };
       // console.log(codeSplit.cdn);
@@ -90,6 +100,7 @@ export default function Editor() {
             onChange={handleEditorChange}
             CDN={CDN}
             autoCDN={autoCDN}
+            code={webCode}
           />
         );
       })}

@@ -45,6 +45,7 @@ export default function MonacoEditor(props) {
           open={open}
           CDN={props.CDN}
           autoCDN={props.autoCDN}
+          code={props.code}
         />
       </div>
       <ControlledEditor

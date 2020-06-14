@@ -6,6 +6,7 @@ import Autocomplete, {
 import Chip from "@material-ui/core/Chip";
 import { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import cdnVersion from "./cdn";
 
 const filter = createFilterOptions();
 
@@ -21,17 +22,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function FreeSoloCreateOption(props) {
+  const code = props.code;
   const classes = useStyles();
-  var cdnPush = [];
-  var [cdnArray, setCdn] = useState([]);
-  const [value, setValue] = React.useState(null);
+  var cdnPush = props.autoCDN;
+  var dummy = [];
+  props.autoCDN.map((newValue) => {
+    dummy.push(`${newValue.title}-${newValue.version}`);
+  }); // a variable which recievs the active values of cdn from editor
+  var [cdnArray, setCdn] = useState(dummy); // a state that tracks the cdn name version
+  const [value, setValue] = React.useState(null); // for autocomplete value
 
   function handleDelete(el) {
     setCdn((prevCdn) => {
       return prevCdn.filter((word) => word !== el);
     });
-    cdnPush.filter((words) => `${words.title}-${words.version}` !== el);
-    props.CDN(cdnPush);
+    cdnPush=cdnPush.filter((words) => `${words.title}-${words.version}` !== el);
+    props.CDN(cdnPush, props.code, "delete");
   }
 
   return (
@@ -39,10 +45,10 @@ export default function FreeSoloCreateOption(props) {
       <Autocomplete
         value={value}
         onChange={(event, newValue) => {
-          console.log(props);
+          event.preventDefault();
           if (newValue != null) {
             cdnPush.push(newValue);
-            props.CDN(cdnPush);
+            props.CDN(cdnPush, props.code);
             setCdn((prevState) => [
               ...prevState,
               `${newValue.title}-${newValue.version}`,
@@ -78,7 +84,7 @@ export default function FreeSoloCreateOption(props) {
         clearOnBlur
         handleHomeEndKeys
         id="free-solo-with-text-demo"
-        options={top100Films}
+        options={cdnVersion}
         getOptionDisabled={(option) =>
           cdnArray.includes(`${option.title}-${option.version}`, 0)
         }
@@ -125,21 +131,3 @@ export default function FreeSoloCreateOption(props) {
     </div>
   );
 }
-
-// Top 100 films as rated by IMDb users. http://www.imdb.com/chart/top
-const top100Films = [
-  {
-    title: "bootstrap",
-    cdn: `
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>`,
-    version: "4.5.0",
-  },
-  {
-    title: "jQuery",
-    cdn: `<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>`,
-    version: "3.5.1",
-  },
-];
