@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
+import {useParams} from 'react-router-dom'
 import MonacoEditor from "./monaco";
 import "./styles.css";
 
 let socket;
-export default function Editor() {
+export default function Editor({socket}) {
+  const {code} = useParams()
   ///              variable & constant declaration section
   var [autoCDN, setAuto] = useState([]);
   const languages = ["html", "css", "javascript"];
@@ -20,16 +22,29 @@ export default function Editor() {
     css: "",
     javascript: "",
   });
+  useEffect(()=>{
+    socket.emit("getPrev",code);
+    socket.on("setData",(data)=>{
+      console.log(data);
+      setWebCode((prevCode)=>{
+        return {
+          html:data[0].html,
+          css:data[0].css,
+          javascript:data[0].js
+        }
+      })
+      codeSplit = {
+        html:data[0].html,
+        css:data[0].css,
+        javascript:data[0].js,
+        cdn:data[0].cdn
+      }
+      updateFrame(codeSplit)
+    })
+  },[])
   // const [cdnPush,setCdn] = useState([])
   const defaultStyles =
     "<style>body{background-color:#333;}p{text-align: center;color:white;}</style><p>pls type your code <3</p>"; //default styles iframe
-  const ENDPOINT = "http://localhost:5000/";
-  //      variable declaration ends
-
-  useEffect(() => {
-    socket = io(ENDPOINT);
-    console.log(socket);
-  }, [ENDPOINT]);
   //activate when change in monaco or in the autocomplete
   useEffect(() => {
     socket.on("code-send", (code) => {
@@ -41,14 +56,16 @@ export default function Editor() {
         cdn: code.cdn,
       };
       updateFrame(codeSplit);
+
     });
   }, [value]);
 
   // for updating code in Iframe
   function updateFrame(newCode) {
     // const code = newCode;
+    console.log(newCode.cdn)
     var css = "<style>" + newCode.css + "</style>";
-    var js = "<script>" + newCode.javascript + "</script>";
+    var js = "<script type='text/babel'>" + newCode.javascript + "</script>";
     var net = newCode.cdn + newCode.html + css + js;
     setValue(net);
     setWebCode((prevValue) => {
@@ -78,9 +95,9 @@ export default function Editor() {
       ...code,
       cdn: cdns,
     };
-    // console.log(codeSplit.cdn);
+    console.log({ ...codeSplit, ...autoCDN,code:code });
     updateFrame(codeSplit);
-    socket.emit("code-recieve", { ...codeSplit, ...autoCDN });
+    socket.emit("code-recieve", { ...codeSplit, ...autoCDN,code:code });
   }
   // to handle change in  monaco Editor and for live editing
   function handleEditorChange(lang, newCode) {
@@ -89,11 +106,17 @@ export default function Editor() {
       [lang]: newCode,
     };
     updateFrame(codeSplit);
-    socket.emit("code-recieve", { ...codeSplit, ...autoCDN });
+    socket.emit("code-recieve", { ...codeSplit, ...autoCDN,code:code });
+    console.log(autoCDN)
   }
   // to check if value is empty and return styles
   function emptyValueChecker() {
     return value === "" ? defaultStyles : value;
+  }
+  function saveCode(){
+    console.log(codeSplit);
+    console.log(autoCDN)
+    // socket.emit("code-save", { ...codeSplit, ...autoCDN, code:code });
   }
   return (
     <div>
